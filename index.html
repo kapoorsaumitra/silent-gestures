@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Silent Gestures</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js">
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cabin&display=swap');
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Cabin', sans-serif;
+        }
+        .background {
+            background-image: url('bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        .blur-overlay {
+            backdrop-filter: blur(3px); /* Adjust the px value to increase/decrease the blur effect */
+            -webkit-backdrop-filter: blur(5px); /* For Safari compatibility */
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            position: relative; /* Ensures the container is above the background and blur overlay */
+            z-index: 2;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            max-width: 600px;
+            width: 100%;
+            word-wrap: break-word;
+        }
+        button, input[type="text"] {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type="text"] {
+            width: 40%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            font-family: 'Cabin', sans-serif;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            font-family: 'Cabin', sans-serif;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="blur-overlay"></div>
+    <div class="container">
+        <input type="text" id="userInput" placeholder="what do you want to say?">
+        <button>Say it!</button>
+        <div id="output"></div>
+    </div>
+    <script type="importmap">
+        {
+          "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+          }
+        }
+    </script>
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
+        const genAI = new GoogleGenerativeAI("AIzaSyBsl7_C7mVABr-uqxDTx13EwzIilSk3KYA");
+
+        async function fetchResponse() {
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            const prompt = document.getElementById('userInput').value + " give steps to say this in ASL.";
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = await response.text();
+            document.getElementById('output').innerHTML = marked.parse(text);
+            console.log(text);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.querySelector('button');
+            button.addEventListener('click', fetchResponse);
+        });
+    </script>
+</body>
+
+</html>
